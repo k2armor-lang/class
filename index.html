@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>나만의 방탈출 만들기 · 워크보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef4ff; --surface:#ffffff; --surface-2:#f4f7fd; --ink:#1f2340; --muted:#5d6385;
+  --line:#d9e1f2; --exit:#3f6cff; --exit-ink:#ffffff; --exit-deep:#2a4fd6;
+  --hero:#ffd84d; --hero-ink:#2a1f00; --pop:#ff5d8f; --mint:#34d1a3;
+  --tape:#ffe6ef; --tape-ink:#5a1432; --tape-edge:#ff5d8f; --danger:#e5484d;
+  --display:"Black Han Sans","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --mono:ui-monospace,"SFMono-Regular",Consolas,monospace;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root[data-theme="dark"]{
+  --bg:#1b1e33; --surface:#252a45; --surface-2:#2d3354; --ink:#eef1ff; --muted:#aab1d6;
+  --line:#3a4168; --exit:#7b97ff; --exit-ink:#10152e; --exit-deep:#9db2ff;
+  --hero:#ffd84d; --hero-ink:#2a1f00; --pop:#ff7aa3; --mint:#4fe0b5;
+  --tape:#3a2740; --tape-ink:#ffdbe7; --tape-edge:#ff7aa3; --danger:#ff7477;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px);scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.65;-webkit-text-size-adjust:100%}
+img{max-width:100%}
+a{color:var(--exit-deep)}
+:root[data-theme="dark"] a{color:var(--exit-deep)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--tape);outline-offset:2px}
+kbd{font-family:var(--mono);font-size:.85em;background:var(--surface-2);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;white-space:nowrap}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface-2);border-radius:4px;padding:1px 5px;word-break:break-all}
+
+/* ---------- hero: exit sign + timer ---------- */
+.hero{max-width:1120px;margin:0 auto;padding:28px 20px 8px}
+.sign{background:var(--hero);color:var(--hero-ink);border-radius:22px;padding:26px 28px 22px;display:grid;grid-template-columns:1fr auto;gap:20px 32px;align-items:end;position:relative;overflow:hidden;box-shadow:0 6px 0 #f0b400}
+.sign::before{content:"";position:absolute;inset:0;pointer-events:none;background:
+ radial-gradient(circle at 88% 18%,rgba(255,93,143,.9) 0 16px,transparent 17px),
+ radial-gradient(circle at 70% 90%,rgba(63,108,255,.85) 0 11px,transparent 12px),
+ radial-gradient(circle at 52% 12%,rgba(52,209,163,.9) 0 8px,transparent 9px),
+ radial-gradient(circle at 96% 70%,rgba(63,108,255,.5) 0 26px,transparent 27px),
+ radial-gradient(circle at 40% 96%,rgba(255,93,143,.6) 0 6px,transparent 7px)}
+.sign>*{position:relative;z-index:1}
+.sign h1{font-family:var(--display);font-weight:400;font-size:clamp(2rem,6vw,3.6rem);line-height:1.05;margin:0;letter-spacing:-.01em}
+.sign p{margin:8px 0 0;font-size:1rem;opacity:.92;max-width:34em}
+.door{display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;font-weight:700;font-size:.9rem;background:var(--hero-ink);color:var(--hero);border-radius:999px;padding:4px 14px 4px 10px}
+.door svg{width:20px;height:20px}
+.clock{text-align:center;background:#fff;color:var(--ink);border-radius:18px;padding:14px 20px;box-shadow:0 4px 0 rgba(0,0,0,.08)}
+.clock-time{color:var(--exit);font-family:var(--display);font-size:clamp(2.6rem,8vw,4.4rem);line-height:1;font-variant-numeric:tabular-nums}
+.clock-phase{font-weight:700;margin-top:4px}
+.clock-btns{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.clock-btns button{background:transparent;border:2px solid var(--exit);color:var(--exit);border-radius:999px;padding:4px 14px;font-weight:700;cursor:pointer}
+.clock-btns button.solid{background:var(--exit);color:#fff}
+.phasebar{grid-column:1/-1;display:grid;grid-template-columns:5fr 30fr 15fr;gap:6px}
+.phase{background:rgba(255,255,255,.6);border-radius:999px;padding:6px 10px;font-size:.82rem;font-weight:700;position:relative;overflow:hidden;min-width:0;white-space:nowrap;text-overflow:ellipsis}
+.phase span{position:relative;z-index:1}
+.phase i{position:absolute;inset:0;width:0;background:var(--pop);opacity:.45}
+.phase[data-p="1"] i{background:var(--exit)} .phase[data-p="2"] i{background:var(--mint)}
+.phase.now{outline:2px solid var(--hero-ink)}
+
+.meta{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 2px 0;color:var(--muted);font-size:.9rem}
+.progress{display:flex;align-items:center;gap:10px;flex:1;min-width:220px}
+.progress-track{flex:1;height:10px;background:var(--line);border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--pop),var(--exit),var(--mint));transition:width .3s}
+.theme-btn{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer;color:var(--ink)}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1120px;margin:0 auto;padding:12px 20px 60px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;align-items:start}
+nav.steps{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+nav.steps ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+nav.steps a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--ink);font-weight:500;font-size:.95rem}
+nav.steps a:hover{background:var(--surface)}
+nav.steps a.active{background:var(--surface);box-shadow:inset 3px 0 0 var(--exit)}
+.num{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:.95rem;background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+.section-head .num{background:var(--hero);border-color:var(--hero);color:var(--hero-ink)}
+a.done .num,.section-head .num.done{background:var(--mint);border-color:var(--mint);color:#fff}
+
+main section{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:24px 24px 20px;margin-bottom:22px}
+.section-head{display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap}
+.section-head .num{width:34px;height:34px;font-size:1.15rem}
+h2{font-family:var(--display);font-weight:400;font-size:1.6rem;margin:0;line-height:1.2}
+.time-tag{margin-left:auto;font-size:.82rem;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+.lead{color:var(--muted);margin:6px 0 16px;max-width:62ch}
+h3{font-size:1.05rem;margin:22px 0 8px}
+
+ol.how{margin:0;padding:0;list-style:none;counter-reset:how}
+ol.how>li{counter-increment:how;position:relative;padding:10px 0 10px 40px;border-top:1px dashed var(--line);max-width:68ch}
+ol.how>li:first-child{border-top:0}
+ol.how>li::before{content:counter(how);position:absolute;left:0;top:10px;width:26px;height:26px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:.85rem;color:var(--exit-deep)}
+.path{font-weight:700}
+
+.tape{background:var(--tape);color:var(--tape-ink);border-left:5px solid var(--tape-edge);border-radius:12px;padding:12px 16px;margin:16px 0;max-width:68ch}
+.tape strong{display:block;margin-bottom:2px}
+.warn{border-left:4px solid var(--danger);background:var(--surface-2);padding:10px 14px;border-radius:0 8px 8px 0;margin:14px 0;max-width:68ch}
+
+/* checklist */
+.checks{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.checks label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;padding:4px 0}
+.checks input{width:20px;height:20px;accent-color:var(--mint);margin-top:3px;flex:none}
+.checks input:checked+span{color:var(--muted);text-decoration:line-through}
+
+/* planner form */
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field.full{grid-column:1/-1}
+.field label{font-weight:700;font-size:.9rem}
+.field small{color:var(--muted);font-size:.8rem}
+input[type=text],input[type=url],select,textarea{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
+textarea{resize:vertical;min-height:44px}
+.objects{grid-column:1/-1;display:grid;gap:8px}
+.obj{display:grid;grid-template-columns:28px minmax(90px,1fr) 2.2fr;gap:8px;align-items:center}
+.obj b{font-family:var(--display);font-weight:400;color:var(--pop);text-align:center}
+
+.prompt-box{margin-top:18px;border:2px solid var(--exit);border-radius:16px;overflow:hidden}
+.prompt-top{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--exit);color:var(--exit-ink);padding:8px 12px;font-weight:700;flex-wrap:wrap}
+pre.prompt{margin:0;padding:14px 16px;white-space:pre-wrap;word-break:break-word;font-family:var(--body);font-size:.92rem;line-height:1.6;background:var(--surface-2);max-height:360px;overflow:auto}
+.copy{background:var(--exit-ink);color:var(--exit);border:0;border-radius:999px;padding:4px 14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.copy.small{background:var(--surface-2);color:var(--ink);border:1px solid var(--line);font-size:.82rem;padding:2px 12px}
+
+/* loop */
+.loop{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0 4px}
+.loop div{background:var(--surface-2);border:2px solid var(--line);border-radius:14px;padding:10px;font-size:.88rem;position:relative}
+.loop div b{display:block;font-size:.95rem}
+.loop div:nth-child(1){border-color:var(--pop)} .loop div:nth-child(2){border-color:var(--hero)} .loop div:nth-child(3){border-color:var(--exit)} .loop div:nth-child(4){border-color:var(--mint)}
+.loop div:not(:last-child)::after{content:"";position:absolute;right:-8px;top:50%;width:8px;height:2px;background:var(--line)}
+
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.compare div{border-radius:8px;padding:10px 12px;font-size:.92rem;border:1px solid var(--line)}
+.compare .bad{background:var(--surface-2)}
+.compare .good{border-color:var(--exit);box-shadow:inset 3px 0 0 var(--exit)}
+.compare em{font-style:normal;font-weight:700;display:block;font-size:.8rem;color:var(--muted)}
+
+.req-list{display:grid;gap:8px}
+.req{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;background:var(--surface-2);border-radius:8px;padding:10px 12px}
+.req p{margin:0;font-size:.92rem}
+.req h4{margin:0 0 2px;font-size:.95rem}
+
+/* url + records */
+.url-row{display:flex;gap:8px;flex-wrap:wrap}
+.url-row input{flex:1;min-width:200px}
+.btn{background:var(--exit);color:var(--exit-ink);border:0;border-radius:999px;padding:9px 16px;font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.table-wrap{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.92rem}
+th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:middle}
+th{font-size:.82rem;color:var(--muted)}
+td input,td select{padding:6px 8px}
+.del{background:none;border:0;color:var(--danger);cursor:pointer;font-weight:700}
+.note{color:var(--muted);font-size:.82rem;margin-top:8px}
+
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:8px 18px;border-radius:999px;font-weight:700;opacity:0;transition:.25s;pointer-events:none;z-index:10}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:860px){
+  .wrap{grid-template-columns:1fr;gap:10px}
+  nav.steps{top:0;z-index:5;background:var(--bg);margin:0 -20px;padding:8px 20px;padding-top:calc(env(safe-area-inset-top,0px) + 8px);border-bottom:1px solid var(--line)}
+  nav.steps ol{flex-direction:row;overflow-x:auto;gap:6px;scrollbar-width:none}
+  nav.steps a{white-space:nowrap;padding:6px 10px;background:var(--surface)}
+  nav.steps a.active{box-shadow:inset 0 -3px 0 var(--exit)}
+  .loop{grid-template-columns:1fr 1fr}
+  .loop div::after{display:none}
+}
+@media (max-width:600px){
+  .sign{grid-template-columns:1fr}
+  .clock{text-align:center}
+  
+  .form,.compare{grid-template-columns:1fr}
+  .obj{grid-template-columns:22px 1fr}
+  .obj textarea{grid-column:2}
+  main section{padding:20px 16px}
+  .phase{font-size:.72rem;padding:5px 6px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="sign">
+    <div>
+      <div class="door">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 21V3h11v18"/><path d="M15 21h5"/><circle cx="11.5" cy="12" r="1" fill="currentColor"/><path d="M18 8l3 4-3 4"/></svg>
+        바이브코딩 3차시
+      </div>
+      <h1>나만의 방탈출 만들기</h1>
+      <p>Gemini에게 말로 설명해서 게임을 만들고, VS Code로 실행하고, GitHub에 올려 친구에게 도전장을 보내요.</p>
+    </div>
+    <div class="clock" aria-live="polite">
+      <div class="clock-time" id="clockTime">50:00</div>
+      <div class="clock-phase" id="clockPhase">수업 시작 전</div>
+      <div class="clock-btns">
+        <button class="solid" id="clockStart" type="button">시작</button>
+        <button id="clockReset" type="button">처음으로</button>
+      </div>
+    </div>
+    <div class="phasebar" aria-hidden="true">
+      <div class="phase" data-p="0"><i></i><span>설계 5분</span></div>
+      <div class="phase" data-p="1"><i></i><span>제작·배포 30분</span></div>
+      <div class="phase" data-p="2"><i></i><span>친구 방 탈출 15분</span></div>
+    </div>
+  </div>
+  <div class="meta">
+    <div class="progress">
+      <span id="progText">진행 0 / 0</span>
+      <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button">🌙 어두운 화면</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="steps" aria-label="단계">
+    <ol id="navList">
+      <li><a href="#s1" data-s="1"><span class="num">1</span>방 설계하기 ✏️</a></li>
+      <li><a href="#s2" data-s="2"><span class="num">2</span>Gemini로 코드 받기 ✨</a></li>
+      <li><a href="#s3" data-s="3"><span class="num">3</span>VS Code에서 실행 💻</a></li>
+      <li><a href="#s4" data-s="4"><span class="num">4</span>고치고 다듬기 🔧</a></li>
+      <li><a href="#s5" data-s="5"><span class="num">5</span>업그레이드 🚀</a></li>
+      <li><a href="#s6" data-s="6"><span class="num">6</span>GitHub에 배포 🌐</a></li>
+      <li><a href="#s7" data-s="7"><span class="num">7</span>친구 방 탈출 🏃</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <!-- 1 -->
+    <section id="s1" data-s="1">
+      <div class="section-head"><span class="num">1</span><h2>방 설계하기</h2><span class="time-tag">5분</span></div>
+      <p class="lead">아래 칸을 채우면 Gemini에게 보낼 요청문이 자동으로 완성돼요. 비밀번호 네 자리가 각각 단서 하나씩에서 나오도록 만들면 좋은 퍼즐이 돼요.</p>
+
+      <div class="form" id="planForm">
+        <div class="field"><label for="f-title">게임 제목</label><input type="text" id="f-title" placeholder="예: 한밤의 과학실"></div>
+        <div class="field"><label for="f-place">배경 장소</label><input type="text" id="f-place" placeholder="예: 불이 꺼진 학교 과학실"></div>
+        <div class="field"><label for="f-mood">분위기</label>
+          <select id="f-mood">
+            <option>으스스한</option><option>신비로운</option><option>귀엽고 아기자기한</option><option>우주 SF 느낌의</option><option>옛날 한옥 느낌의</option><option>코믹한</option>
+          </select>
+        </div>
+        <div class="field"><label for="f-pw">탈출 비밀번호 (숫자 4자리)</label><input type="text" id="f-pw" inputmode="numeric" maxlength="4" placeholder="예: 3719"></div>
+        <div class="field"><label for="f-tries">기회 횟수</label>
+          <select id="f-tries"><option>3</option><option selected>5</option><option>7</option><option>무제한</option></select>
+        </div>
+        <div class="field"><label for="f-story">시작 이야기 (선택)</label><input type="text" id="f-story" placeholder="예: 정신을 차려 보니 문이 잠겨 있다"></div>
+        <div class="objects">
+          <div class="field"><label>방 안의 물건과 단서</label><small>물건을 클릭하면 단서가 나와요. 예) 시계 → "시계가 3시에 멈춰 있다" (첫 번째 숫자 3)</small></div>
+          <div class="obj"><b>1</b><input type="text" id="o1" placeholder="물건 1" aria-label="물건 1"><textarea id="c1" rows="1" placeholder="단서 1" aria-label="단서 1"></textarea></div>
+          <div class="obj"><b>2</b><input type="text" id="o2" placeholder="물건 2" aria-label="물건 2"><textarea id="c2" rows="1" placeholder="단서 2" aria-label="단서 2"></textarea></div>
+          <div class="obj"><b>3</b><input type="text" id="o3" placeholder="물건 3" aria-label="물건 3"><textarea id="c3" rows="1" placeholder="단서 3" aria-label="단서 3"></textarea></div>
+          <div class="obj"><b>4</b><input type="text" id="o4" placeholder="물건 4" aria-label="물건 4"><textarea id="c4" rows="1" placeholder="단서 4" aria-label="단서 4"></textarea></div>
+        </div>
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-top"><span>Gemini에게 보낼 요청문</span><button class="copy" type="button" data-copy-target="genPrompt">요청문 복사</button></div>
+        <pre class="prompt" id="genPrompt"></pre>
+      </div>
+
+      <div class="checks" data-group="1">
+        <label><input type="checkbox" data-c="1a"><span>배경과 분위기를 정했다</span></label>
+        <label><input type="checkbox" data-c="1b"><span>물건 4개와 단서를 모두 적었다</span></label>
+        <label><input type="checkbox" data-c="1c"><span>단서를 풀면 비밀번호가 나오는지 스스로 확인했다</span></label>
+      </div>
+    </section>
+
+    <!-- 2 -->
+    <section id="s2" data-s="2">
+      <div class="section-head"><span class="num">2</span><h2>Gemini로 첫 코드 받기</h2><span class="time-tag">제작 시작</span></div>
+      <p class="lead">Gemini는 내 설명을 코드로 바꿔 주는 동료예요. 한 채팅방에서 계속 대화해야 Gemini가 내 게임을 기억해요.</p>
+      <ol class="how">
+        <li>크롬에서 <a href="https://gemini.google.com" target="_blank" rel="noopener">gemini.google.com</a>에 접속해 로그인해요.</li>
+        <li>화면 왼쪽 위의 <span class="path">새 채팅</span>을 눌러 빈 대화방을 열어요.</li>
+        <li>1단계에서 복사한 요청문을 입력창에 붙여 넣고(<kbd>Ctrl</kbd>+<kbd>V</kbd>) 전송해요.</li>
+        <li>답변 속 회색 코드 상자의 오른쪽 위 <span class="path">복사 아이콘</span>을 눌러 코드 전체를 복사해요.</li>
+        <li>코드 아래 설명도 한 번 읽어 보세요. 어떤 기능이 들어갔는지 알려 줘요.</li>
+      </ol>
+      <div class="tape"><strong>코드가 중간에 끊겼다면?</strong>같은 채팅방에 이렇게 보내요. "코드가 중간에 끊겼어. index.html 하나에 들어가는 전체 코드를 처음부터 다시 줘."</div>
+      <div class="warn">코드 상자가 여러 개로 나뉘어 나오면(HTML, CSS, JS 따로) "세 개를 하나의 HTML 파일로 합쳐서 전체 코드를 줘"라고 다시 요청하세요.</div>
+      <div class="checks" data-group="2">
+        <label><input type="checkbox" data-c="2a"><span>Gemini에 요청문을 보냈다</span></label>
+        <label><input type="checkbox" data-c="2b"><span>하나로 된 전체 코드를 복사했다</span></label>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section id="s3" data-s="3">
+      <div class="section-head"><span class="num">3</span><h2>VS Code에서 실행하기</h2></div>
+      <p class="lead">복사한 코드를 파일로 저장하고, 브라우저에서 내 방탈출을 처음 열어 봐요.</p>
+      <ol class="how">
+        <li>바탕화면에 새 폴더를 만들고 이름을 <code>escape-room</code>으로 정해요.</li>
+        <li>VS Code를 열고 <span class="path">파일 → 폴더 열기</span>에서 <code>escape-room</code> 폴더를 선택해요. "작성자를 신뢰합니까?" 창이 뜨면 <span class="path">예</span>를 눌러요.</li>
+        <li>왼쪽 탐색기에서 <span class="path">새 파일</span> 아이콘을 누르고 이름을 <code>index.html</code>로 입력해요. 이 이름이어야 배포했을 때 첫 화면으로 열려요.</li>
+        <li>편집창을 클릭하고 <kbd>Ctrl</kbd>+<kbd>V</kbd>로 붙여 넣은 뒤 <kbd>Ctrl</kbd>+<kbd>S</kbd>로 저장해요.</li>
+        <li>확장 탭(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>)에서 <span class="path">Live Server</span>를 검색해 설치해요. 이미 있으면 건너뛰어요.</li>
+        <li>편집창에서 마우스 오른쪽 버튼 → <span class="path">Open with Live Server</span>를 누르면 브라우저에 게임이 열려요. 이제 저장할 때마다 화면이 자동으로 새로고침돼요.</li>
+      </ol>
+      <div class="tape"><strong>Live Server가 안 된다면?</strong><code>escape-room</code> 폴더에서 <code>index.html</code>을 더블클릭해도 열려요. 이때는 저장 후 브라우저에서 <kbd>F5</kbd>를 눌러 새로고침해요.</div>
+      <div class="checks" data-group="3">
+        <label><input type="checkbox" data-c="3a"><span>index.html로 저장했다</span></label>
+        <label><input type="checkbox" data-c="3b"><span>브라우저에서 내 게임이 열렸다</span></label>
+        <label><input type="checkbox" data-c="3c"><span>처음부터 끝까지 직접 탈출해 봤다</span></label>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section id="s4" data-s="4">
+      <div class="section-head"><span class="num">4</span><h2>고치고 다듬기</h2></div>
+      <p class="lead">바이브코딩의 핵심은 이 반복이에요. 한 번에 완벽할 필요 없어요.</p>
+      <div class="loop">
+        <div><b>해 보기</b>직접 플레이</div>
+        <div><b>찾기</b>이상한 점 발견</div>
+        <div><b>요청하기</b>Gemini에 구체적으로</div>
+        <div><b>바꾸기</b>전체 붙여넣기 후 저장</div>
+      </div>
+
+      <h3>Gemini에게 구체적으로 말하기</h3>
+      <div class="compare">
+        <div class="bad"><em>이렇게 말하면 Gemini도 헷갈려요</em>이상해. 고쳐줘.</div>
+        <div class="good"><em>이렇게 말해요</em>사물함을 클릭해도 아무 일도 안 일어나. 클릭하면 단서 창이 뜨게 고치고 전체 코드를 다시 줘.</div>
+      </div>
+      <div class="compare">
+        <div class="bad"><em>막연한 요청</em>더 멋있게 해줘.</div>
+        <div class="good"><em>분명한 요청</em>배경을 짙은 남색으로 바꾸고, 물건 위에 마우스를 올리면 노란빛이 나게 해줘.</div>
+      </div>
+
+      <h3>화면이 하얗거나 버튼이 안 눌릴 때</h3>
+      <ol class="how">
+        <li>게임이 열린 브라우저에서 <kbd>F12</kbd>를 누르고 <span class="path">Console</span> 탭을 열어요.</li>
+        <li>빨간 글씨로 된 오류 메시지를 드래그해서 복사해요.</li>
+        <li>Gemini에 "이런 오류가 나와: (붙여넣기). 고친 전체 코드를 줘."라고 보내요.</li>
+        <li>VS Code에서 <kbd>Ctrl</kbd>+<kbd>A</kbd>로 기존 코드를 모두 선택하고, 새 코드로 붙여 넣은 뒤 저장해요.</li>
+      </ol>
+      <div class="tape"><strong>"전체 코드를 다시 줘"를 붙이는 이유</strong>일부만 받으면 어디에 넣어야 할지 헷갈려서 오류가 나기 쉬워요. 통째로 바꾸는 것이 가장 안전해요.</div>
+
+      <h3>간단한 글자는 직접 고쳐 보기</h3>
+      <p style="max-width:68ch">VS Code에서 <kbd>Ctrl</kbd>+<kbd>F</kbd>를 누르고 <code>탈출 성공</code>처럼 화면에 보이는 문구를 검색해 보세요. 그 글자를 직접 바꾸고 저장하면 바로 반영돼요. 코드가 어떻게 생겼는지 알아 가는 첫걸음이에요.</p>
+
+      <div class="checks" data-group="4">
+        <label><input type="checkbox" data-c="4a"><span>Gemini에게 구체적으로 수정을 요청해 봤다</span></label>
+        <label><input type="checkbox" data-c="4b"><span>VS Code에서 문구를 직접 바꿔 봤다</span></label>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section id="s5" data-s="5">
+      <div class="section-head"><span class="num">5</span><h2>업그레이드</h2><span class="time-tag">선택</span></div>
+      <p class="lead">기본 게임이 잘 돌아가면 하나씩 골라 추가해요. 한 번에 하나씩 요청해야 오류가 적어요.</p>
+      <div class="req-list" id="reqList"></div>
+      <div class="checks" data-group="5">
+        <label><input type="checkbox" data-c="5a"><span>업그레이드를 하나 이상 추가했다</span></label>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section id="s6" data-s="6">
+      <div class="section-head"><span class="num">6</span><h2>GitHub에 배포하기</h2></div>
+      <p class="lead">2차시에 퀴즈를 올렸던 방법과 같아요. 배포하면 친구가 링크만으로 내 방에 들어올 수 있어요.</p>
+      <ol class="how">
+        <li><a href="https://github.com" target="_blank" rel="noopener">github.com</a>에 로그인하고, 오른쪽 위 <span class="path">+ → New repository</span>를 눌러요.</li>
+        <li>Repository name에 <code>escape-room</code>을 입력하고 <span class="path">Public</span>을 선택한 뒤 <span class="path">Create repository</span>를 눌러요.</li>
+        <li>다음 화면의 <span class="path">uploading an existing file</span> 링크를 누르고, <code>index.html</code>을 끌어다 놓은 뒤 <span class="path">Commit changes</span>를 눌러요.</li>
+        <li><span class="path">Settings → 왼쪽 메뉴 Pages</span>로 가서 Branch를 <code>main</code>, 폴더를 <code>/ (root)</code>로 고르고 <span class="path">Save</span>를 눌러요.</li>
+        <li>1~2분 기다린 뒤 새로고침하면 위쪽에 주소가 나타나요. 보통 <code>https://내아이디.github.io/escape-room/</code> 모양이에요.</li>
+      </ol>
+      <div class="tape"><strong>배포한 뒤에 또 고쳤다면?</strong>저장소 화면에서 <span class="path">Add file → Upload files</span>로 수정한 <code>index.html</code>을 다시 올리고 Commit하면 덮어써져요. 반영까지 1~2분 걸려요.</div>
+
+      <h3>내 방 주소 적어 두기</h3>
+      <div class="url-row">
+        <input type="url" id="myUrl" placeholder="https://내아이디.github.io/escape-room/" aria-label="내 방탈출 주소">
+        <button class="btn ghost" type="button" id="openMyUrl">열어 보기</button>
+        <button class="btn" type="button" id="copyMyUrl">주소 복사</button>
+      </div>
+      <div class="checks" data-group="6">
+        <label><input type="checkbox" data-c="6a"><span>GitHub Pages 주소로 내 게임이 열린다</span></label>
+        <label><input type="checkbox" data-c="6b"><span>친구들에게 주소를 공유했다</span></label>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section id="s7" data-s="7">
+      <div class="section-head"><span class="num">7</span><h2>친구 방 탈출하기</h2><span class="time-tag">15분</span></div>
+      <p class="lead">친구의 링크로 들어가 탈출에 도전해요. 기록을 남기고, 끝나면 만든 사람에게 어떤 퍼즐이 가장 재밌었는지 말해 주세요.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>만든 친구</th><th>방 이름</th><th>탈출 시간</th><th>난이도</th><th>한 줄 소감</th><th></th></tr></thead>
+          <tbody id="recBody"></tbody>
+        </table>
+      </div>
+      <button class="btn ghost" type="button" id="addRec" style="margin-top:10px">기록 추가</button>
+      <p class="note">적은 내용은 이 브라우저에만 저장돼요. 다른 컴퓨터에서는 보이지 않아요.</p>
+      <div class="checks" data-group="7">
+        <label><input type="checkbox" data-c="7a"><span>친구 방 2개에 도전했다</span></label>
+        <label><input type="checkbox" data-c="7b"><span>만든 친구에게 소감을 전했다</span></label>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  var KEY='escape-workboard-v1';
+  var state={checks:{},plan:{},url:'',records:[]};
+  try{var raw=localStorage.getItem(KEY);if(raw){var s=JSON.parse(raw);if(s&&typeof s==='object'){state.checks=s.checks||{};state.plan=s.plan||{};state.url=s.url||'';state.records=Array.isArray(s.records)?s.records:[];}}}catch(e){}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+
+  var $=function(id){return document.getElementById(id)};
+  var toastT;
+  function toast(msg){var t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},1600);}
+  function copyText(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){toast('복사했어요')},function(){fallback(text)});
+    }else fallback(text);
+  }
+  function fallback(text){
+    var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');toast('복사했어요');}catch(e){toast('복사에 실패했어요. 직접 드래그해서 복사하세요');}
+    document.body.removeChild(ta);
+  }
+
+  /* theme */
+  var themeBtn=$('themeBtn');
+  try{var th=localStorage.getItem(KEY+'-theme');if(th){document.documentElement.setAttribute('data-theme',th);themeBtn.textContent=th==='dark'?'☀️ 밝은 화면':'🌙 어두운 화면';}}catch(e){}
+  themeBtn.addEventListener('click',function(){
+    var cur=document.documentElement.getAttribute('data-theme');
+    var dark=cur==='dark';
+    var next=dark?'light':'dark';
+    document.documentElement.setAttribute('data-theme',next);themeBtn.textContent=next==='dark'?'☀️ 밝은 화면':'🌙 어두운 화면';
+    try{localStorage.setItem(KEY+'-theme',next);}catch(e){}
+  });
+
+  /* planner */
+  var ids=['f-title','f-place','f-mood','f-pw','f-tries','f-story','o1','c1','o2','c2','o3','c3','o4','c4'];
+  function v(id,ph){var x=(state.plan[id]||'').trim();return x||ph;}
+  function buildPrompt(){
+    var tries=v('f-tries','5');
+    var mood=v('f-mood','으스스한');
+    var lines=[
+      'HTML, CSS, JavaScript를 index.html 파일 하나에 모두 담아서 방탈출 게임을 만들어줘.',
+      '',
+      '[게임 정보]',
+      '- 제목: '+v('f-title','[게임 제목]'),
+      '- 배경: '+v('f-place','[배경 장소]'),
+      '- 분위기: '+mood+' 분위기',
+      '- 시작 화면: 제목과 "'+v('f-story','정신을 차려 보니 문이 잠겨 있다')+'"라는 이야기, 그리고 시작 버튼을 보여줘.',
+      '',
+      '[방 안의 물건과 단서]',
+      '물건을 클릭하면 단서가 팝업 창으로 나오고, 닫기 버튼으로 닫을 수 있어.'
+    ];
+    for(var i=1;i<=4;i++)lines.push(i+'. '+v('o'+i,'[물건 '+i+']')+': '+v('c'+i,'[단서 '+i+']'));
+    lines.push('','[규칙]',
+      '- 화면 아래에 4자리 비밀번호 입력칸과 확인 버튼을 만들어줘.',
+      '- 정답은 '+v('f-pw','[비밀번호 4자리]')+'야.',
+      tries==='무제한'?'- 기회는 무제한이고, 틀리면 "비밀번호가 틀렸다"는 메시지를 보여줘.':'- 기회는 '+tries+'번이고, 틀릴 때마다 남은 기회를 보여줘. 기회를 다 쓰면 "탈출 실패" 화면과 다시 하기 버튼이 나오게 해줘.',
+      '- 정답을 맞히면 "탈출 성공!" 화면과 함께 시작부터 걸린 시간을 보여줘.',
+      '','[디자인]',
+      '- '+mood+' 분위기에 어울리는 색과 글꼴로 꾸며줘.',
+      '- 물건은 어울리는 이모지와 이름으로 보여주고, 마우스를 올리면 살짝 커지게 해줘.',
+      '- 외부 이미지 파일은 쓰지 말아줘.',
+      '- 휴대폰 화면에서도 잘 보이게 해줘.',
+      '','코드를 여러 개로 나누지 말고 전체 코드를 한 번에 줘.');
+    $('genPrompt').textContent=lines.join('\n');
+  }
+  ids.forEach(function(id){
+    var el=$(id);if(!el)return;
+    if(state.plan[id]!==undefined)el.value=state.plan[id];
+    else state.plan[id]=el.value;
+    el.addEventListener('input',function(){
+      if(id==='f-pw'){el.value=el.value.replace(/\D/g,'').slice(0,4);}
+      state.plan[id]=el.value;save();buildPrompt();
+    });
+  });
+  buildPrompt();
+
+  document.querySelectorAll('[data-copy-target]').forEach(function(b){
+    b.addEventListener('click',function(){copyText($(b.getAttribute('data-copy-target')).textContent);});
+  });
+
+  /* upgrades */
+  var ups=[
+    ['남은 시간 타이머','화면 위쪽에 5분 카운트다운 타이머를 추가해줘. 시간이 다 되면 "탈출 실패" 화면이 나오게 하고 전체 코드를 다시 줘.'],
+    ['효과음','외부 소리 파일 없이 Web Audio API로 효과음을 만들어줘. 물건을 클릭할 때 "딸깍", 틀렸을 때 "삐-", 성공했을 때 짧은 멜로디가 나오게 하고 전체 코드를 다시 줘.'],
+    ['힌트 버튼','힌트 버튼을 추가해줘. 누를 때마다 힌트가 하나씩 나오고, 힌트를 쓸 때마다 탈출 기록에 30초가 더해지게 하고 전체 코드를 다시 줘.'],
+    ['오답 흔들림','비밀번호가 틀리면 입력칸이 좌우로 흔들리고 잠깐 빨갛게 변하게 해줘. 전체 코드를 다시 줘.'],
+    ['아이템 가방','물건 중 하나를 클릭하면 "열쇠"를 얻어서 화면 아래 가방 칸에 표시되게 해줘. 열쇠가 있어야 사물함 단서를 볼 수 있게 바꾸고 전체 코드를 다시 줘.'],
+    ['엔딩 연출','탈출에 성공하면 문이 열리는 애니메이션과 함께 색종이가 흩날리게 해줘. 전체 코드를 다시 줘.']
+  ];
+  var rl=$('reqList');
+  ups.forEach(function(u){
+    var d=document.createElement('div');d.className='req';
+    var box=document.createElement('div');
+    var h=document.createElement('h4');h.textContent=u[0];
+    var p=document.createElement('p');p.textContent=u[1];
+    box.appendChild(h);box.appendChild(p);
+    var b=document.createElement('button');b.className='copy small';b.type='button';b.textContent='복사';
+    b.addEventListener('click',function(){copyText(u[1]);});
+    d.appendChild(box);d.appendChild(b);rl.appendChild(d);
+  });
+
+  /* checks + progress */
+  var boxes=document.querySelectorAll('.checks input[type=checkbox]');
+  function updateProgress(){
+    var done=0;boxes.forEach(function(b){if(b.checked)done++;});
+    $('progText').textContent='진행 '+done+' / '+boxes.length;
+    $('progFill').style.width=(boxes.length?done/boxes.length*100:0)+'%';
+    document.querySelectorAll('.checks[data-group]').forEach(function(g){
+      var n=g.getAttribute('data-group');
+      var all=g.querySelectorAll('input');var ok=all.length>0;
+      all.forEach(function(x){if(!x.checked)ok=false;});
+      var a=document.querySelector('nav.steps a[data-s="'+n+'"]');if(a)a.classList.toggle('done',ok);
+      var hn=document.querySelector('#s'+n+' .section-head .num');if(hn)hn.classList.toggle('done',ok);
+    });
+  }
+  boxes.forEach(function(b){
+    var k=b.getAttribute('data-c');b.checked=!!state.checks[k];
+    b.addEventListener('change',function(){state.checks[k]=b.checked;save();updateProgress();});
+  });
+  updateProgress();
+
+  /* url */
+  var mu=$('myUrl');mu.value=state.url;
+  mu.addEventListener('input',function(){state.url=mu.value.trim();save();});
+  $('openMyUrl').addEventListener('click',function(){
+    var u=mu.value.trim();
+    if(!/^https?:\/\//.test(u)){toast('https:// 로 시작하는 주소를 적어 주세요');return;}
+    window.open(u,'_blank','noopener');
+  });
+  $('copyMyUrl').addEventListener('click',function(){
+    var u=mu.value.trim();if(!u){toast('먼저 주소를 적어 주세요');return;}copyText(u);
+  });
+
+  /* records */
+  var rb=$('recBody');
+  function renderRecs(){
+    rb.innerHTML='';
+    if(state.records.length===0)state.records.push({who:'',room:'',time:'',level:'3',memo:''});
+    state.records.forEach(function(r,i){
+      var tr=document.createElement('tr');
+      function cell(key,ph,w){
+        var td=document.createElement('td');var inp=document.createElement('input');inp.type='text';inp.value=r[key]||'';inp.placeholder=ph;inp.setAttribute('aria-label',ph);if(w)inp.style.width=w;
+        inp.addEventListener('input',function(){r[key]=inp.value;save();});td.appendChild(inp);return td;
+      }
+      tr.appendChild(cell('who','이름','90px'));
+      tr.appendChild(cell('room','방 이름'));
+      tr.appendChild(cell('time','예: 3분 20초','110px'));
+      var td=document.createElement('td');var sel=document.createElement('select');sel.setAttribute('aria-label','난이도');
+      ['1 쉬움','2','3 보통','4','5 어려움'].forEach(function(t,j){var o=document.createElement('option');o.value=String(j+1);o.textContent=t;sel.appendChild(o);});
+      sel.value=r.level||'3';sel.addEventListener('change',function(){r.level=sel.value;save();});td.appendChild(sel);tr.appendChild(td);
+      tr.appendChild(cell('memo','가장 재밌던 퍼즐은?'));
+      var tdd=document.createElement('td');var del=document.createElement('button');del.className='del';del.type='button';del.textContent='삭제';del.setAttribute('aria-label',(i+1)+'번째 기록 삭제');
+      del.addEventListener('click',function(){state.records.splice(i,1);save();renderRecs();});
+      tdd.appendChild(del);tr.appendChild(tdd);rb.appendChild(tr);
+    });
+  }
+  $('addRec').addEventListener('click',function(){state.records.push({who:'',room:'',time:'',level:'3',memo:''});save();renderRecs();});
+  renderRecs();
+
+  /* nav active */
+  var links=document.querySelectorAll('nav.steps a');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){if(e.isIntersecting){var n=e.target.getAttribute('data-s');
+        links.forEach(function(a){var on=a.getAttribute('data-s')===n;a.classList.toggle('active',on);if(on&&a.scrollIntoView&&window.innerWidth<=860){var ol=a.closest('ol');ol.scrollTo({left:a.offsetLeft-20,behavior:'smooth'});}});}});
+    },{rootMargin:'-35% 0px -60% 0px'});
+    document.querySelectorAll('main section').forEach(function(s){io.observe(s);});
+  }
+
+  /* class timer (in memory) */
+  var TOTAL=50*60, phases=[{n:'1단계 · 방 설계',len:5*60},{n:'제작 · 배포',len:30*60},{n:'친구 방 탈출',len:15*60}];
+  var elapsed=0,running=false,startAt=0,tick=null;
+  var startBtn=$('clockStart'),phaseEls=document.querySelectorAll('.phase');
+  function fmt(s){s=Math.max(0,Math.ceil(s));var m=Math.floor(s/60),r=s%60;return(m<10?'0':'')+m+':'+(r<10?'0':'')+r;}
+  function now(){return running?elapsed+(Date.now()-startAt)/1000:elapsed;}
+  function render(){
+    var e=Math.min(now(),TOTAL);
+    $('clockTime').textContent=fmt(TOTAL-e);
+    var acc=0,label='수업 끝! 수고했어요';
+    phaseEls.forEach(function(el,i){
+      var p=phases[i],f=Math.min(Math.max((e-acc)/p.len,0),1);
+      el.querySelector('i').style.width=(f*100)+'%';
+      var isNow=e>=acc&&e<acc+p.len&&(running||e>0);
+      el.classList.toggle('now',isNow);
+      if(isNow)label='지금: '+p.n+' (남은 '+fmt(acc+p.len-e)+')';
+      acc+=p.len;
+    });
+    if(e===0&&!running)label='수업 시작 전';
+    $('clockPhase').textContent=label;
+    if(e>=TOTAL&&running){elapsed=TOTAL;running=false;clearInterval(tick);startBtn.textContent='시작';}
+  }
+  startBtn.addEventListener('click',function(){
+    if(running){elapsed=now();running=false;clearInterval(tick);startBtn.textContent='이어서';}
+    else{if(elapsed>=TOTAL)elapsed=0;startAt=Date.now();running=true;tick=setInterval(render,500);startBtn.textContent='일시정지';}
+    render();
+  });
+  $('clockReset').addEventListener('click',function(){running=false;clearInterval(tick);elapsed=0;startBtn.textContent='시작';render();});
+  render();
+})();
+</script>
+</body>
+</html>
